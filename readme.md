@@ -6,13 +6,14 @@ go get github.com/zhiminwen/magetool
 ```
 
 ```
-import(
+import (
 	"github.com/zhiminwen/magetool/shellkit"
 	"github.com/zhiminwen/magetool/sshkit"
 )
 ```
 
-## Medium Story
+## [Medium Story](https://medium.com/@zhimin.wen/implement-capistrano-sshkit-in-golang-32d8d094e65d)
+
 
 ## Synopsis
 
@@ -112,4 +113,7 @@ client1.ExecuteInteractively("scp ubuntu@ubuntu:/tmp/test.txt /tmp/test.txt.dupp
   "password":   "password",
  })
 ```
+
+## Full example to build a docker image and push to dockerhub
+[Source Code](sample/dockerBuild/dockerBuilder.go)
 
