@@ -37,6 +37,8 @@ type SSHClient struct {
 	PrivatekeyFile string
 	UUID           string
 
+	Properties map[string]string
+
 	ClientConfig *ssh.ClientConfig
 	// DialTimeoutSecond int
 	// MaxDataThroughput uint64
@@ -64,7 +66,7 @@ func AuthByPrivateKey(keyfile string) (ssh.AuthMethod, error) {
 
 func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
 	if password == "" && keyfile == "" {
-		log.Fatalf("Both password and private key are empty.")
+		log.Fatalf("Failed to construct ssh client. both password and private key are empty.")
 	}
 	var authMethod ssh.AuthMethod
 	var err error
@@ -88,6 +90,7 @@ func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
 		Port:           port,
 		User:           user,
 		Password:       password,
+		Properties:     map[string]string{},
 		PrivatekeyFile: keyfile,
 		ClientConfig: &ssh.ClientConfig{
 			User: user,
@@ -101,6 +104,10 @@ func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
 	}
 
 	return client
+}
+
+func (c *SSHClient) SetProperty(key, value string) {
+	c.Properties[key] = value
 }
 
 func (c *SSHClient) Connect() {
