@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/magefile/mage/sh"
 	"github.com/zhiminwen/magetool/fmtkit"
+	"github.com/zhiminwen/quote"
 )
 
 var myfmt fmtkit.Formatter
@@ -43,6 +45,22 @@ func display(reader io.Reader, wg *sync.WaitGroup, dispFn func(string)) {
 func Execute(cmd string, args ...string) {
 	var env map[string]string
 	execute(env, cmd, args...)
+}
+
+//Execute as shell command
+func ExecuteShell(cmd string) {
+	var shell, arg string
+	if runtime.GOOS == "windows" {
+		shell = "cmd"
+		arg = "/c"
+	} else {
+		shell = "sh"
+		arg = "-c"
+	}
+
+	args := []string{arg}
+	args = append(args, quote.Word(cmd)...)
+	Execute(shell, args...)
 }
 
 func ExecuteWith(env map[string]string, cmd string, args ...string) {
