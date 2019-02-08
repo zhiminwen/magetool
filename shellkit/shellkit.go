@@ -57,7 +57,7 @@ func ExecuteShell(cmd string) {
 		arg = "-c"
 	}
 
-	args := []string{arg, fmt.Sprintf(`"%s"`, cmd)}
+	args := []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
 	Execute(shell, args...)
 }
 
