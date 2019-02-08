@@ -15,7 +15,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/magefile/mage/sh"
 	"github.com/zhiminwen/magetool/fmtkit"
-	"github.com/zhiminwen/quote"
 )
 
 var myfmt fmtkit.Formatter
@@ -58,8 +57,7 @@ func ExecuteShell(cmd string) {
 		arg = "-c"
 	}
 
-	args := []string{arg}
-	args = append(args, quote.Word(cmd)...)
+	args := []string{arg, fmt.Sprintf(`"%s"`, cmd)}
 	Execute(shell, args...)
 }
 
