@@ -64,10 +64,12 @@ func AuthByPrivateKey(keyfile string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(signer), nil
 }
 
-func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
+func NewSSHClient(host, port, user, password, keyfile string) (*SSHClient, error) {
 	if password == "" && keyfile == "" {
-		log.Fatalf("Failed to construct ssh client. both password and private key are empty.")
+		log.Printf("Failed to construct ssh client. both password and private key are empty.")
+		return nil, fmt.Errorf("Failed to construct ssh client. both password and private key are empty.")
 	}
+
 	var authMethod ssh.AuthMethod
 	var err error
 
@@ -77,7 +79,8 @@ func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
 	if keyfile != "" {
 		authMethod, err = AuthByPrivateKey(keyfile)
 		if err != nil {
-			log.Fatalf("Failed to get public keys from supplied keyfile. Error: %v", err)
+			log.Printf("Failed to get public keys from supplied keyfile. Error: %v", err)
+			return nil, err
 		}
 	}
 	now := time.Now()
@@ -103,34 +106,41 @@ func NewSSHClient(host, port, user, password, keyfile string) *SSHClient {
 		UUID: uuid.String(),
 	}
 
-	return client
+	return client, nil
 }
 
 func (c *SSHClient) SetProperty(key, value string) {
 	c.Properties[key] = value
 }
 
-func (c *SSHClient) Connect() {
+func (c *SSHClient) Connect() error {
 	if c.isConnected {
-		return
+		return nil
 	}
 
 	sshClient, err := ssh.Dial("tcp", c.Host+":"+c.Port, c.ClientConfig)
 
 	if err != nil {
-		log.Fatalf("Failed to connect to %s. error:%v", c.Host, err)
+		log.Printf("Failed to connect to %s. error:%v", c.Host, err)
+		return err
 	}
 
 	c.sshClient = sshClient
 	c.isConnected = true
+
+	return nil
 }
 
 func (c *SSHClient) NewSession() (*ssh.Session, error) {
-	c.Connect()
+	err := c.Connect()
+	if err != nil {
+		return nil, err
+	}
 
 	session, err := c.sshClient.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create SSH session for %s. error:%v", c.Host, err)
+		log.Printf("Failed to create SSH session for %s. error:%v", c.Host, err)
+		return nil, err
 	}
 
 	return session, nil
@@ -153,15 +163,18 @@ func (c *SSHClient) Close() error {
 func (c *SSHClient) Capture(cmd string) (string, error) {
 	session, err := c.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create session:%v", err)
+		log.Printf("Failed to create session:%v", err)
+		return "", err
 	}
 	defer session.Close()
 
 	out, err := session.CombinedOutput(cmd)
 
 	if err != nil {
-		log.Fatalf("Failed to execute. Exit...")
+		log.Printf("Failed to execute:%v", err)
+		return "", err
 	}
+
 	result := strings.TrimSpace(string(out[:]))
 	return result, nil
 }
@@ -202,7 +215,8 @@ func (c *SSHClient) Execute(cmd string) error {
 
 	session, err := c.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create session:%v", err)
+		log.Printf("Failed to create session:%v", err)
+		return err
 	}
 	defer session.Close()
 
@@ -268,13 +282,15 @@ func (c *SSHClient) ExecuteInteractively(cmd string, inputMap map[string]string)
 
 	session, err := c.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create session:%v", err)
+		log.Printf("Failed to create session:%v", err)
+		return err
 	}
 	defer session.Close()
 
 	err = c.RequestPty(session)
 	if err != nil {
-		log.Fatalf("Failed to request pty")
+		log.Printf("Failed to request pty")
+		return err
 	}
 
 	//pipe need to be before Start
@@ -338,7 +354,7 @@ func (c *SSHClient) ExecuteInteractively(cmd string, inputMap map[string]string)
 func (c *SSHClient) UploadByReader(r io.Reader, remoteFullPath string, size int64, permission string) error {
 	session, err := c.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create session:%v", err)
+		log.Printf("Failed to create session:%v", err)
 		return err
 	}
 	defer session.Close()
@@ -409,7 +425,7 @@ func (c *SSHClient) Put(content string, remoteFullPath string) error {
 func (c *SSHClient) DownloadByWriter(remoteFullPath string, dstWriter io.Writer) error {
 	session, err := c.NewSession()
 	if err != nil {
-		log.Fatalf("Failed to create session:%v", err)
+		log.Printf("Failed to create session:%v", err)
 		return err
 	}
 	defer session.Close()

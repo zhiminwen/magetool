@@ -7,13 +7,20 @@ import (
 	"log"
 
 	"github.com/zhiminwen/magetool/sshkit"
+	"github.com/zhiminwen/quote"
 )
 
 var servers []*sshkit.SSHClient
 
 func init() {
-	servers = append(servers, sshkit.NewSSHClient("192.168.5.10", "22", "ubuntu", "password", ""))
-	servers = append(servers, sshkit.NewSSHClient("192.168.5.10", "22", "ubuntu2", "password", ""))
+	for _, ip := range quote.Word(`192.168.5.10 192.168.5.11`) {
+		client, err := sshkit.NewSSHClient(ip, "22", "ubuntu", "password", "")
+		if err != nil {
+			log.Fatalf("Failed to create ssh client for %s. err=%v", ip, err)
+		}
+		servers = append(servers, client)
+	}
+
 }
 
 //Capture Hostname

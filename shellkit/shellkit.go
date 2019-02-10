@@ -65,7 +65,7 @@ func ExecuteWith(env map[string]string, cmd string, args ...string) {
 	execute(env, cmd, args...)
 }
 
-func execute(env map[string]string, cmd string, args ...string) {
+func execute(env map[string]string, cmd string, args ...string) error {
 	myfmt.Header(cmd, args...)
 	startTime := time.Now()
 
@@ -78,13 +78,13 @@ func execute(env map[string]string, cmd string, args ...string) {
 	stdout, err := c.StdoutPipe()
 	if err != nil {
 		log.Printf("Failed to get stdout. %v", err)
-		return
+		return err
 	}
 
 	stderr, err := c.StderrPipe()
 	if err != nil {
 		log.Printf("Failed to get stderr. %v", err)
-		return
+		return err
 	}
 
 	var wg sync.WaitGroup
@@ -105,18 +105,20 @@ func execute(env map[string]string, cmd string, args ...string) {
 	myfmt.Footer(duration, err)
 
 	if err != nil {
-		log.Fatalf("Failed to execute. Exit...")
+		log.Printf("Failed to execute", err)
+		return err
 	}
 }
 
 //Capture the output as string
-func Capture(cmd string, args ...string) string {
+func Capture(cmd string, args ...string) (string, error) {
 	stdout, err := sh.Output(cmd, args...)
 	if err != nil {
 		fmt.Printf("%s", color.RedString("Failed to run %s %v. Error:%v", cmd, args, err))
-		os.Exit(1)
+		// os.Exit(1)
+		return "", err
 	}
 	// fmt.Printf("output:%s", stdout)
 	stdout = strings.TrimSpace(stdout)
-	return stdout
+	return stdout, nil
 }
