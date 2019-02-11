@@ -108,6 +108,7 @@ func execute(env map[string]string, cmd string, args ...string) error {
 		log.Printf("Failed to execute", err)
 		return err
 	}
+	return nil
 }
 
 //Capture the output as string
