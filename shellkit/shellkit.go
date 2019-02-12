@@ -49,15 +49,17 @@ func Execute(cmd string, args ...string) {
 //Execute as shell command
 func ExecuteShell(cmd string) {
 	var shell, arg string
+	var args []string
 	if runtime.GOOS == "windows" {
 		shell = "cmd"
 		arg = "/c"
+		args = []string{arg, fmt.Sprintf(`%s`, cmd)} //windows
 	} else {
 		shell = "sh"
 		arg = "-c"
+		args = []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
 	}
 
-	args := []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
 	Execute(shell, args...)
 }
 
