@@ -14,6 +14,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/magefile/mage/sh"
+	"github.com/mattn/go-shellwords"
 	"github.com/zhiminwen/magetool/fmtkit"
 )
 
@@ -55,9 +56,16 @@ func ExecuteShell(cmd string) {
 		arg = "/c"
 		args = []string{arg, fmt.Sprintf(`%s`, cmd)} //windows
 	} else {
+		full := fmt.Sprintf(`-c "%s"`, cmd)
+		parsed, err := shellwords.Parse(full)
+		if err != nil {
+			log.Printf("Failed to parse as shell words:%v", err)
+			return
+		}
+		args = parsed
 		shell = "sh"
-		arg = "-c"
-		args = []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
+		// arg = "-c"
+		// args = []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
 	}
 
 	Execute(shell, args...)
