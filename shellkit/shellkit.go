@@ -47,8 +47,7 @@ func Execute(cmd string, args ...string) {
 	execute(env, cmd, args...)
 }
 
-//Execute as shell command
-func ExecuteShell(cmd string) {
+func shellCommands(cmd string) (string, []string) {
 	var shell, arg string
 	var args []string
 	if runtime.GOOS == "windows" {
@@ -60,14 +59,18 @@ func ExecuteShell(cmd string) {
 		parsed, err := shellwords.Parse(full)
 		if err != nil {
 			log.Printf("Failed to parse as shell words:%v", err)
-			return
+			return "", []string{}
 		}
 		args = parsed
 		shell = "sh"
-		// arg = "-c"
-		// args = []string{arg, fmt.Sprintf(`""%s""`, cmd)} //double quote to work??
 	}
 
+	return shell, args
+}
+
+//Execute as shell command
+func ExecuteShell(cmd string) {
+	shell, args := shellCommands(cmd)
 	Execute(shell, args...)
 }
 
@@ -122,8 +125,9 @@ func execute(env map[string]string, cmd string, args ...string) error {
 }
 
 //Capture the output as string
-func Capture(cmd string, args ...string) (string, error) {
-	stdout, err := sh.Output(cmd, args...)
+func Capture(cmd string) (string, error) {
+	shell, args := shellCommands(cmd)
+	stdout, err := sh.Output(shell, args...)
 	if err != nil {
 		fmt.Printf("%s", color.RedString("Failed to run %s %v. Error:%v", cmd, args, err))
 		// os.Exit(1)
