@@ -207,6 +207,13 @@ func (c *SSHClient) display(reader *bufio.Reader, stderr bool, wg *sync.WaitGrou
 	wg.Done()
 }
 
+func (c *SSHClient) MustExecute(cmd string) {
+	err := c.Execute(cmd)
+	if err != nil {
+		log.Fatalf("Execution fatal failure")
+	}
+}
+
 func (c *SSHClient) Execute(cmd string) error {
 	var wg sync.WaitGroup
 
