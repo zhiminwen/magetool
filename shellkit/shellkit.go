@@ -42,9 +42,9 @@ func display(reader io.Reader, wg *sync.WaitGroup, dispFn func(string)) {
 }
 
 // Execute the command
-func Execute(cmd string, args ...string) {
+func Execute(cmd string, args ...string) error {
 	var env map[string]string
-	execute(env, cmd, args...)
+	return execute(env, cmd, args...)
 }
 
 func shellCommands(cmd string) (string, []string) {
@@ -69,9 +69,9 @@ func shellCommands(cmd string) (string, []string) {
 }
 
 //Execute as shell command
-func ExecuteShell(cmd string) {
+func ExecuteShell(cmd string) error {
 	shell, args := shellCommands(cmd)
-	Execute(shell, args...)
+	return Execute(shell, args...)
 }
 
 func ExecuteWith(env map[string]string, cmd string, args ...string) {
