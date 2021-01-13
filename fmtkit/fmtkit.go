@@ -25,11 +25,13 @@ func (bf *BasicFormatter) Header(cmd string, args ...string) {
 }
 
 func (bf *BasicFormatter) NormalLine(prefix, line string) {
-	log.Printf("%s %s\n", color.WhiteString(prefix), color.GreenString(line))
+	// log.Printf("%s %s\n", color.WhiteString(prefix), color.GreenString(line))
+	log.Printf("%s\n", color.GreenString(line))
 }
 
 func (bf *BasicFormatter) ErrorLine(prefix, line string) {
-	log.Printf("%s %s\n", color.WhiteString(prefix), color.RedString(line))
+	// log.Printf("%s %s\n", color.WhiteString(prefix), color.RedString(line))
+	log.Printf("%s\n", color.RedString(line))
 }
 
 func (bf *BasicFormatter) Footer(duration time.Duration, err error) {
