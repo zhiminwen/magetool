@@ -1,7 +1,9 @@
 package fmtkit
 
 import (
+	"fmt"
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/fatih/color"
@@ -16,22 +18,36 @@ type Formatter interface {
 
 type BasicFormatter struct{}
 
+//taking care for window's environment
+func printf(format string, args ...string) {
+	ifaceArgs := []interface{}{}
+	for _, v := range args {
+		ifaceArgs = append(ifaceArgs, v)
+	}
+
+	if runtime.GOOS == "windows" {
+		fmt.Fprintf(color.Output, format, ifaceArgs...)
+	} else {
+		log.Printf(format, ifaceArgs...)
+	}
+}
+
 func (bf *BasicFormatter) Header(cmd string, args ...string) {
 	if len(args) > 0 {
-		log.Printf("===== Executing Command: '%s' at %s =====\n", color.HiYellowString("%s %s", cmd, args), time.Now().Format("15:04:05"))
+		printf("===== Executing Command: '%s' at %s =====\n", color.HiYellowString("%s %s", cmd, args), time.Now().Format("15:04:05"))
 	} else {
-		log.Printf("===== Executing Command: '%s' at %s =====\n", color.HiYellowString("%s", cmd), time.Now().Format("15:04:05"))
+		printf("===== Executing Command: '%s' at %s =====\n", color.HiYellowString("%s", cmd), time.Now().Format("15:04:05"))
 	}
 }
 
 func (bf *BasicFormatter) NormalLine(prefix, line string) {
-	// log.Printf("%s %s\n", color.WhiteString(prefix), color.GreenString(line))
-	log.Printf("%s\n", color.GreenString(line))
+	// printf("%s %s\n", color.WhiteString(prefix), color.GreenString(line))
+	printf("%s\n", color.GreenString(line))
 }
 
 func (bf *BasicFormatter) ErrorLine(prefix, line string) {
-	// log.Printf("%s %s\n", color.WhiteString(prefix), color.RedString(line))
-	log.Printf("%s\n", color.RedString(line))
+	// printf("%s %s\n", color.WhiteString(prefix), color.RedString(line))
+	printf("%s\n", color.RedString(line))
 }
 
 func (bf *BasicFormatter) Footer(duration time.Duration, err error) {
@@ -41,10 +57,10 @@ func (bf *BasicFormatter) Footer(duration time.Duration, err error) {
 
 	if err != nil {
 		statusString = red("X")
-		log.Printf("===== Error: %s =====\n", color.RedString("%v", err))
+		printf("===== Error: %s =====\n", color.RedString("%v", err))
 	} else {
 		statusString = green("√")
 	}
 
-	log.Printf("===== Ended at: %s (Total: %s) (%s) =====\n", time.Now().Format("15:04:05"), color.HiYellowString(duration.String()), statusString)
+	printf("===== Ended at: %s (Total: %s) (%s) =====\n", time.Now().Format("15:04:05"), color.HiYellowString(duration.String()), statusString)
 }
