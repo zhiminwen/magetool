@@ -1,14 +1,13 @@
 package sshkit
 
 import (
-	"fmt"
-
 	"golang.org/x/crypto/ssh"
 )
 
 func (c *SSHClient) ProxySSHClient(host, port, user, password, keyfile string) (*SSHClient, error) {
-	if !c.isConnected {
-		return nil, fmt.Errorf("not connected to SSH jump host yet")
+	err := c.Connect()
+	if err != nil {
+		return nil, err
 	}
 
 	proxyClient, err := NewSSHClient(host, port, user, password, keyfile)
