@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -53,7 +52,7 @@ func (c *SSHClient) GetSSHClient() *ssh.Client {
 }
 
 func AuthByPrivateKey(keyfile string) (ssh.AuthMethod, error) {
-	pemBytes, err := ioutil.ReadFile(keyfile)
+	pemBytes, err := os.ReadFile(keyfile)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +66,7 @@ func AuthByPrivateKey(keyfile string) (ssh.AuthMethod, error) {
 func NewSSHClient(host, port, user, password, keyfile string) (*SSHClient, error) {
 	if password == "" && keyfile == "" {
 		log.Printf("Failed to construct ssh client. both password and private key are empty.")
-		return nil, fmt.Errorf("Failed to construct ssh client. both password and private key are empty.")
+		return nil, fmt.Errorf("failed to construct ssh client. both password and private key are empty")
 	}
 
 	var authMethod ssh.AuthMethod
@@ -383,15 +382,16 @@ func (c *SSHClient) UploadByReader(r io.Reader, remoteFullPath string, size int6
 
 	go func() {
 		iop := NewIOProgress(size, "Uploading", "Uploaded")
-		teeReader := io.TeeReader(r, iop)
+		teeReader := io.TeeReader(r, iop.Bar)
 
 		fmt.Fprintln(w, "C"+permission, size, path.Base(remoteFullPath))
 		_, err := io.Copy(w, teeReader)
+		// _, err := io.Copy(w, r)
 		if err != nil {
 			log.Printf("Failed to copy io: %v", err)
 		}
 		fmt.Fprintln(w, "\x00")
-		iop.FinalMessage()
+		// iop.FinalMessage()
 	}()
 
 	err = session.Wait()

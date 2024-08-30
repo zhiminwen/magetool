@@ -27,9 +27,9 @@ func nextSinkAction(buf *bufio.Reader) (byte, error) {
 		line, _, err := buf.ReadLine()
 		if err != nil {
 			log.Printf("Failed to read error string:%v", err)
-			return 0, fmt.Errorf("Sink protocol error. message unknown")
+			return 0, fmt.Errorf("sink protocol error. message unknown")
 		}
-		return 0, fmt.Errorf("Sink protocol error: %s", line)
+		return 0, fmt.Errorf("sink protocol error: %s", line)
 	}
 
 	return b, nil
@@ -44,6 +44,9 @@ func sinkProtocol(r io.Reader, w io.Writer, dstWriter io.Writer) error {
 	}
 	buf := bufio.NewReader(r)
 	act, err := nextSinkAction(buf)
+	if err != nil {
+		return err
+	}
 
 	var perm os.FileMode
 	var size int64
@@ -66,11 +69,11 @@ func sinkProtocol(r io.Reader, w io.Writer, dstWriter io.Writer) error {
 	} else {
 		// not expecting any other act
 		log.Printf("Unexpected action from sink. byte=%x", act)
-		return fmt.Errorf("Unexpected action from sink")
+		return fmt.Errorf("unexpected action from sink")
 	}
 
 	iop := NewIOProgress(size, "Downloading", "Downloaded")
-	teeReader := io.TeeReader(buf, iop)
+	teeReader := io.TeeReader(buf, iop.Bar)
 
 	_, err = io.CopyN(dstWriter, teeReader, size)
 	if err != nil {
@@ -84,6 +87,5 @@ func sinkProtocol(r io.Reader, w io.Writer, dstWriter io.Writer) error {
 		return err
 	}
 
-	iop.FinalMessage()
 	return nil
 }
