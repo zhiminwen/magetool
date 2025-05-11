@@ -30,6 +30,11 @@ func NewIOProgress(total int64, prefixDoing, prefixDone string) *IOProgress {
 	return p
 }
 
+func (p *IOProgress) Exit() {
+	p.Bar.Exit()
+}
+
+//
 // func (p *IOProgress) Write(data []byte) (int, error) {
 // 	n := len(data)
 // 	// p.SumSoFar = p.SumSoFar + int64(n)

@@ -391,6 +391,7 @@ func (c *SSHClient) UploadByReader(r io.Reader, remoteFullPath string, size int6
 			log.Printf("Failed to copy io: %v", err)
 		}
 		fmt.Fprintln(w, "\x00")
+		iop.Exit() //exit to stop the updating of the bar
 		// iop.FinalMessage()
 	}()
 

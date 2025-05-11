@@ -32,7 +32,7 @@ func TestExecuteWithPassword(t *testing.T) {
 		t.Fatalf("Failed to capture:%v", err)
 	}
 
-	assert.Equal(hostname, "ubuntu")
+	assert.Equal(t, hostname, "ubuntu")
 
 }
 
