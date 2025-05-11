@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.24.0
 
 require (
+	github.com/dsnet/try v0.0.3
 	github.com/fatih/color v1.18.0
 	github.com/oklog/ulid v1.3.1
 	github.com/schollz/progressbar/v3 v3.18.0

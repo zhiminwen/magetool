@@ -382,16 +382,19 @@ func (c *SSHClient) UploadByReader(r io.Reader, remoteFullPath string, size int6
 
 	go func() {
 		iop := NewIOProgress(size, "Uploading", "Uploaded")
-		teeReader := io.TeeReader(r, iop.Bar)
+		// teeReader := io.TeeReader(r, iop.Bar)
 
 		fmt.Fprintln(w, "C"+permission, size, path.Base(remoteFullPath))
-		_, err := io.Copy(w, teeReader)
+		// bytes, err := io.Copy(w, teeReader)
+		// bytes, err := io.Copy(io.MultiWriter(w, iop.Bar), r)
+		_, err := io.Copy(io.MultiWriter(w, iop.Bar), r)
 		// _, err := io.Copy(w, r)
 		if err != nil {
 			log.Printf("Failed to copy io: %v", err)
 		}
 		fmt.Fprintln(w, "\x00")
-		iop.Exit() //exit to stop the updating of the bar
+		// log.Printf("its done. copied %d bytes", bytes)
+		iop.Bar.Close() //exit to stop the updating of the bar
 		// iop.FinalMessage()
 	}()
 
