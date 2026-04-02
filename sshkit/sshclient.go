@@ -150,12 +150,16 @@ func (c *SSHClient) Close() error {
 		return nil
 	}
 
-	err := c.sshClient.Close()
-	if err != nil {
-		log.Printf("Failed to close SSH connection")
-		return err
+	if c.sshClient != nil {
+		err := c.sshClient.Close()
+		if err != nil {
+			log.Printf("Failed to close SSH connection")
+			return err
+		}
 	}
 
+	c.sshClient = nil
+	c.isConnected = false
 	return nil
 }
 
