@@ -114,6 +114,31 @@ client1.ExecuteInteractively("scp ubuntu@ubuntu:/tmp/test.txt /tmp/test.txt.dupp
  })
 ```
 
+Build a client through ordered SSH hops
+
+```golang
+target, err := sshkit.NewSSHClientChain([]sshkit.SSHHostConfig{
+	{
+		Host:           "jump-1.example.com",
+		Port:           22,
+		User:           "ubuntu",
+		Authentication: sshkit.AuthTypeKey,
+		Key:            "/keys/jump-1",
+	},
+	{
+		Host:           "bastion.example.com",
+		Port:           22,
+		User:           "ubuntu",
+		Authentication: sshkit.AuthTypePassword,
+		Password:       "secret",
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+target.Execute("hostname")
+```
+
 ## Full example to build a docker image and push to dockerhub
 [Source Code](sample/dockerBuild/dockerBuilder.go)
-
